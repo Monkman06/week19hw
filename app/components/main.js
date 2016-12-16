@@ -1,51 +1,68 @@
-import React from "react";
+// Include React
+var React = require("react");
 
-// Import sub-components
-import Form from "./children/Form";
-import Results from "./children/Results";
+// Here we include all of the sub-components
+var Form = require("./children/Form");
+var Results = require("./children/Results");
+var History = require("./children/History");
 
-// Helper Function
-import helpers from "./utils/helpers";
+// Helper for making AJAX requests to our API
+var helpers = require("./utils/helpers");
 
-class Main extends React.Component {
+// Creating the Main component
+var Main = React.createClass({
 
-  constructor(props) {
+  // Here we set a generic state associated with the number of clicks
+  // Note how we added in this history state variable
+  getInitialState: function() {
+    return { searchTerm: "", results: "", history: [] };
+  },
 
-    super(props);
+  // The moment the page renders get the History
+  componentDidMount: function() {
+    // Get the latest history.
+    helpers.getHistory().then(function(response) {
+      console.log(response);
+      if (response !== this.state.history) {
+        console.log("History", response.data);
+        this.setState({ history: response.data });
+      }
+    }.bind(this));
+  },
 
-    this.state = {
-      searchTerm: "",
-      results: ""
-    };
+  // If the component changes (i.e. if a search is entered)...
+  componentDidUpdate: function() {
 
-    this.setTerm = this.setTerm.bind(this);
-  }
+    // Run the query for the address
+    helpers.runQuery(this.state.searchTerm).then(function(data) {
+      if (data !== this.state.results) {
+        console.log("Address", data);
+        this.setState({ results: data });
 
-  componentDidUpdate(prevProps, prevState) {
+        // After we've received the result... then post the search term to our history.
+        helpers.postHistory(this.state.searchTerm).then(function() {
+          console.log("Updated!");
 
-    if (prevState.searchTerm !== this.state.searchTerm) {
-      console.log("UPDATED");
+          // After we've done the post... then get the updated history
+          helpers.getHistory().then(function(response) {
+            console.log("Current History", response.data);
 
-      helpers.runQuery(this.state.searchTerm).then((data) => {
-        if (data !== this.state.results) {
-          console.log(data);
+            console.log("History", response.data);
 
-          this.setState({ results: data });
-        }
-      });
-    }
-  }
+            this.setState({ history: response.data });
 
-  setTerm(term) {
-    this.setState({
-      searchTerm: term
-    });
-  }
-
-  render() {
-
+          }.bind(this));
+        }.bind(this));
+      }
+    }.bind(this));
+  },
+  // This function allows childrens to update the parent.
+  setTerm: function(term) {
+    this.setState({ searchTerm: term });
+  },
+  // Here we render the function
+  render: function() {
     return (
-
       <div className="container">
         <div className="row">
           <div className="jumbotron">
@@ -69,10 +86,16 @@ class Main extends React.Component {
 
         </div>
 
+        <div className="row">
+
+          <History history={this.state.history} />
+
+        </div>
+
       </div>
     );
   }
-}
+});
 
-// Export the componen back for use in other files
-export default Main;
+// Export the component back for use in other files
+module.exports = Main;
