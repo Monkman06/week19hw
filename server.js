@@ -23,7 +23,7 @@ app.use(express.static('./public'));
 // -------------------------------------------------
 
 // MongoDB Configuration configuration (Change this URL to your own DB)
-mongoose.connect('mongodb://admin:codingrocks@ds023664.mlab.com:23664/reactlocate');
+mongoose.connect('mongodb://heroku_kzwr15zv:nc8qmv1sa215ggiuht5rgpt6g5@ds139278.mlab.com:39278/heroku_kzwr15zv');
 var db = mongoose.connection;
 
 db.on('error', function (err) {
@@ -71,14 +71,11 @@ app.post('/api/', function(req, res){
       console.log(err);
     }
     else {
-      res.send("Saved Search");
+      res.send("Article Saved");
     }
   })
 });
-
-
 // -------------------------------------------------
-
 // Listener
 app.listen(PORT, function() {
   console.log("App listening on PORT: " + PORT);
