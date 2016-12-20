@@ -108,7 +108,7 @@ var Main = React.createClass({
 
 					<div className="col-md-6">
 				
-						<Results address={this.state.results} />
+						<Results title={this.state.results} />
 
 					</div>
 
